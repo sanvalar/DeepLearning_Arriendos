@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitaEdu - Plataforma de Vivienda Estudiantil</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet JS Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        :root {
+            --primary-blue: #1E3C72;
+            --secondary-blue: #2A5298;
+            --tech-purple: #6C5CE7;
+            --emerald-opportunity: #00B894;
+            --dark-navy: #0F172A;
+            --slate-card: #1E293B;
+            --light-bg: #F8FAFC;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            color: #334155;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .brand-font {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+            border-radius: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.12);
+        }
+
+        /* Leaflet Map Frame */
+        #map {
+            height: 520px;
+            width: 100%;
+            border-radius: 1.25rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        /* Hero Section Gradient */
+        .hero-section {
+            background: linear-gradient(135deg, #0F172A 0%, #1E3C72 50%, #2A5298 100%);
+            position: relative;
+            padding: 5rem 0 6rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.25) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 0.75rem 1.25rem;
+        }
+
+        /* Range Slider Styling */
+        .form-range::-webkit-slider-thumb {
+            background: var(--tech-purple);
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+        }
+
+        /* Property Product Card */
+        .property-card {
+            border-radius: 1.25rem;
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+            background: #FFFFFF;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .property-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: var(--tech-purple);
+        }
+
+        .score-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            color: #F8FAFC;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .badge-opportunity { background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .badge-fair { background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+        .badge-overpriced { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+
+        .btn-saas {
+            background: linear-gradient(135deg, var(--tech-purple) 0%, #4834D4 100%);
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.85rem;
+            padding: 0.85rem 1.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.35);
+        }
+
+        .btn-saas:hover {
+            background: linear-gradient(135deg, #4834D4 0%, #301B92 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Nav Pills Customization */
+        .nav-pills .nav-link {
+            border-radius: 0.75rem;
+            font-weight: 600;
+            color: #64748B;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-pills .nav-link.active {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.25);
+        }
+
+        /* Table Design */
+        .custom-table {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        
+        .custom-table thead {
+            background-color: var(--dark-navy);
+            color: white;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+        }
+
+        .extra-small {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar Commercial -->
+    <header class="glass-header sticky-top text-white z-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <a href="#" class="d-flex align-items-center text-white text-decoration-none">
+                    <div class="bg-primary rounded-3 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, #6C5CE7, #00B894) !important;">
+                        <i class="fa-solid fa-graduation-cap text-white fs-5"></i>
+                    </div>
+                    <span class="brand-font fs-4 fw-bold">HabitaEdu</span>
+                </a>
+
+                <nav class="d-none d-md-flex align-items-center gap-4 text-sm font-medium">
+                    <a href="#buscador-sec" class="text-white text-decoration-none opacity-75 hover-100">Buscador Inteligente</a>
+                    <a href="#mapa-sec" class="text-white text-decoration-none opacity-75 hover-100">Mapa de Oportunidades</a>
+                    <a href="#caso-estudio" class="text-white text-decoration-none opacity-75 hover-100">Caso de Estudio</a>
+                    <a href="#matriz-tecnica" class="text-white text-decoration-none opacity-75 hover-100">Matriz Técnica</a>
+                </nav>
+
+                <button class="btn btn-sm btn-outline-light rounded-pill px-3 fw-semibold">
+                    <i class="fa-solid fa-building-columns me-1"></i> Alcaldía de Medellín
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container position-relative z-1">
+            <div class="row align-items-center gy-5">
+                <div class="col-lg-7">
+                    <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-20 rounded-pill px-3 py-2 mb-3 fw-normal">
+                        <i class="fa-solid fa-brain me-1 text-warning"></i> Redes Neuronales Basadas en Contenido (CBNN) & DCF
+                    </span>
+                    <h1 class="display-4 fw-extrabold mb-3">
+                        Vivienda Estudiantil Transparente en Medellín
+                    </h1>
+                    <p class="lead text-white opacity-90 mb-4">
+                        Optimizamos la búsqueda de alojamiento universitario mediante Deep Learning en <strong>HabitaEdu</strong>, contrarrestando la gentrificación y la especulación inmobiliaria con estimaciones de precio justo proyectadas por IA.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="stat-badge d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-calculator fs-3 text-warning"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">13 Parámetros</h6>
+                                <small class="text-white-50">Planeación Municipal</small>
+                            </div>
+                        </div>
+                        <div class="stat-badge d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-chart-line fs-3 text-success"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">R² = 0.88</h6>
+                                <small class="text-white-50">Precisión del Modelo MLP</small>
+                            </div>
+                        </div>
+                        <div class="stat-badge d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-database fs-3 text-info"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Base de Datos SQL</h6>
+                                <small class="text-white-50">Persistencia PostgreSQL/SQLite</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="p-4 rounded-4 text-dark shadow-lg glass-card">
+                        <h4 class="fw-bold mb-3 text-navy"><i class="fa-solid fa-rocket text-primary me-2"></i>Inferencia en Tiempo Real</h4>
+                        <p class="text-muted small mb-4">Selecciona tu universidad y presupuesto en <strong>HabitaEdu</strong> para ejecutar la red neuronal y visualizar la distribución geoespacial de opciones.</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small">UNIVERSIDAD DE DESTINO</label>
+                            <select id="hero-univ" class="form-select form-select-lg rounded-3 fs-6 font-semibold" onchange="runInference()">
+                                <option value="USB">Univ. San Buenaventura (USB)</option>
+                                <option value="UdeA" selected>Universidad de Antioquia (UdeA)</option>
+                                <option value="UNAL">Univ. Nacional de Colombia (UNAL)</option>
+                                <option value="EAFIT">Universidad EAFIT</option>
+                                <option value="UPB">Univ. Pontificia Bolivariana (UPB)</option>
+                                <option value="UdeM">Universidad de Medellín (UdeM)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small">PRESUPUESTO MÁXIMO (COP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" id="hero-presupuesto" class="form-control form-control-lg fs-6 fw-bold" value="1300000" step="50000" onchange="runInference()">
+                            </div>
+                        </div>
+
+                        <a href="#mapa-sec" onclick="runInference()" class="btn btn-saas w-100 py-3 mt-2 text-center text-decoration-none d-block">
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Generar Mapeo de Oportunidades
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="container my-5">
+
+        <!-- Section: Perfilamiento / Sliders -->
+        <section id="buscador-sec" class="glass-card p-4 p-md-5 mb-5">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-purple text-white p-3 rounded-3" style="background-color: var(--tech-purple);">
+                    <i class="fa-solid fa-sliders fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0 text-navy">Perfilador de Preferencias Estudiantiles</h3>
+                    <p class="text-muted mb-0">Ajusta las prioridades de <strong>HabitaEdu</strong> para recalcular el Puntaje de Idoneidad según tus requerimientos personales.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-secondary small">CERCANÍA A AULAS (KM)</label>
+                    <input type="range" class="form-range" id="weight-cercania" min="1" max="10" value="8" oninput="runInference()">
+                    <div class="d-flex justify-content-between text-muted extra-small"><span>Flexible</span><span class="fw-bold text-primary">Alta Prioridad</span></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-secondary small">VALOR JUSTO IA (PRECIO / VALOR)</label>
+                    <input type="range" class="form-range" id="weight-valor" min="1" max="10" value="9" oninput="runInference()">
+                    <div class="d-flex justify-content-between text-muted extra-small"><span>Indiferente</span><span class="fw-bold text-success">Máximo Ahorro</span></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-secondary small">SEGURIDAD DE LA ZONA</label>
+                    <input type="range" class="form-range" id="weight-seguridad" min="1" max="10" value="7" oninput="runInference()">
+                    <div class="d-flex justify-content-between text-muted extra-small"><span>Básico</span><span class="fw-bold text-info">Alta Seguridad</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Map + Recommendations -->
+        <section id="mapa-sec" class="row g-4 mb-5">
+            <!-- Map Container -->
+            <div class="col-lg-7">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+                        <h5 class="fw-bold mb-0 text-navy"><i class="fa-solid fa-map-location-dot text-primary me-2"></i>Geolocalización y Oportunidades</h5>
+                        <span class="badge bg-dark text-white font-normal" id="status-count">Cargando Mapa...</span>
+                    </div>
+                    <!-- Contenedor del Mapa Leaflet -->
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Recommendations Product List -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-navy"><i class="fa-solid fa-list-check text-purple me-2"></i>Alternativas en HabitaEdu</h5>
+                            <small class="text-muted">Rankeadas por IA</small>
+                        </div>
+                        
+                        <div id="recommendations-container" class="d-flex flex-column gap-3 overflow-y-auto" style="max-height: 430px;">
+                            <!-- Insertado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center text-muted extra-small">
+                        <span><i class="fa-solid fa-circle text-success me-1"></i> Oportunidad IA</span>
+                        <span><i class="fa-solid fa-circle text-warning me-1"></i> Precio Justo</span>
+                        <span><i class="fa-solid fa-circle text-danger me-1"></i> Sobreprecio</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Case Study Tabs -->
+        <section id="caso-estudio" class="glass-card p-4 p-md-5 mb-5">
+            <h3 class="fw-bold mb-2 text-navy"><i class="fa-solid fa-briefcase text-primary me-2"></i>Caso de Estudio Aplicado & Análisis Ejecutivo</h3>
+            <p class="text-muted mb-4">Evaluación de impacto para la reubicación transparente de estudiantes foráneos en el Valle de Aburrá.</p>
+
+            <ul class="nav nav-pills mb-4" id="caseStudyTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="context-tab" data-bs-toggle="pill" data-bs-target="#context-content" type="button" role="tab">1. Diagnóstico de Crisis</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="solution-tab" data-bs-toggle="pill" data-bs-target="#solution-content" type="button" role="tab">2. Solución Deep Learning</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="impact-tab" data-bs-toggle="pill" data-bs-target="#impact-content" type="button" role="tab">3. Impacto & Ahorro Medible</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="caseStudyTabsContent">
+                <!-- Tab 1 -->
+                <div class="tab-pane fade show active" id="context-content" role="tabpanel">
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-7">
+                            <h5 class="fw-bold text-navy mb-3">La Crisis Habitacional Postpandemia en Medellín</h5>
+                            <p class="text-slate-600">
+                                La alta dinámica inmobiliaria de Medellín y el fenómeno de gentrificación han ocasionado un incremento acelerado en los cánones de arrendamiento, desplazando a la población estudiantil proveniente de las subregiones de Antioquia y el resto del país.
+                            </p>
+                            <p class="text-slate-600">
+                                <strong>HabitaEdu</strong> da respuesta directa al reto del Departamento Administrativo de Planeación de la Alcaldía de Medellín, ofreciendo una plataforma soportada en datos que transparenta los valores de mercado.
+                            </p>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="p-4 rounded-4 bg-light border border-slate-200">
+                                <h6 class="fw-bold text-danger mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>Impacto en la Comunidad Estudiantil</h6>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 text-sm">
+                                    <li><i class="fa-solid fa-arrow-trend-up text-danger me-2"></i> Incremento sustancial en cánones tradicionales</li>
+                                    <li><i class="fa-solid fa-user-minus text-warning me-2"></i> Desplazamiento estudiantil a periferias</li>
+                                    <li><i class="fa-solid fa-clock text-info me-2"></i> Aumento en los tiempos de desplazamiento diario</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2 -->
+                <div class="tab-pane fade" id="solution-content" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 bg-white border border-slate-200 h-100">
+                                <h6 class="fw-bold text-purple mb-2"><i class="fa-solid fa-database me-2"></i>Persistencia SQL</h6>
+                                <p class="small text-muted mb-0">Base de datos estructurada que captura los 13 parámetros críticos requeridos por Planeación Mpal. (áreas verdes, seguridad, nivel de ruido, etc.).</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 bg-white border border-slate-200 h-100">
+                                <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-network-wired me-2"></i>Modelo CBNN (MLP)</h6>
+                                <p class="small text-muted mb-0">Red Neuronal que proyecta el valor justo intrínseco del arriendo aislando factores de especulación urbana.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 bg-white border border-slate-200 h-100">
+                                <h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-filter me-2"></i>Filtrado Colaborativo DCF</h6>
+                                <p class="small text-muted mb-0">Empareja preferencias individuales y restricciones presupuestales con ubicaciones estratégicas cercanas a universidades.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3 -->
+                <div class="tab-pane fade" id="impact-content" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table custom-table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Perfil Estudiantil</th>
+                                    <th>Universidad</th>
+                                    <th>Presupuesto</th>
+                                    <th>Zona Tradicional</th>
+                                    <th>Recomendación HabitaEdu</th>
+                                    <th>Ahorro Estimado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Estudiante de Urabá</td>
+                                    <td><span class="badge bg-primary">USB San Benito</span></td>
+                                    <td>$1,100,000 COP</td>
+                                    <td>El Poblado ($1.8M)</td>
+                                    <td>Laureles / La América</td>
+                                    <td class="text-success fw-bold">$380,000 / mes</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Estudiante del Oriente</td>
+                                    <td><span class="badge bg-success">UdeA / UNAL</span></td>
+                                    <td>$850,000 COP</td>
+                                    <td>Centro ($1.1M)</td>
+                                    <td>Robledo / Sevilla</td>
+                                    <td class="text-success fw-bold">$250,000 / mes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Technical Requirements Matrix -->
+        <section id="matriz-tecnica" class="glass-card p-4 p-md-5">
+            <h3 class="fw-bold mb-4 text-navy"><i class="fa-solid fa-table-list text-primary me-2"></i>Matriz de Requerimientos Técnicos y Conceptos</h3>
+            
+            <div class="table-responsive">
+                <table class="table custom-table border mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Categoría</th>
+                            <th style="width: 35%;">Herramientas & Tecnologías</th>
+                            <th style="width: 40%;">Conceptos Aplicados</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-navy"><i class="fa-solid fa-spider text-primary me-2"></i>Scraping & Data SQL</td>
+                            <td>BeautifulSoup4, Requests, SQLAlchemy, SQLite, PostgreSQL</td>
+                            <td>Raspado web ético con cumplimiento de `robots.txt`, modelado Entidad-Relación, persistencia ACID.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-navy"><i class="fa-solid fa-gears text-purple me-2"></i>Preprocesamiento</td>
+                            <td>Pandas, NumPy, Scikit-Learn (StandardScaler)</td>
+                            <td>Normalización escalar Z-score, Imputación por mediana, Cálculo de distancias con la Fórmula de Haversine.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-navy"><i class="fa-solid fa-brain text-success me-2"></i>Modelado Deep Learning</td>
+                            <td>PyTorch, MLPRegressor, TransformedTargetRegressor</td>
+                            <td>Redes Neuronales Basadas en Contenido (CBNN), Filtrado Colaborativo Profundo (DCF), Transformación Logarítmica del Canon Target.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-navy"><i class="fa-solid fa-desktop text-info me-2"></i>Producto Comercial</td>
+                            <td>Bootstrap 5, Leaflet.js (Esri Tiles), FontAwesome 6</td>
+                            <td>Diseño responsivo, Glassmorphism UI/UX, Georreferenciación libre de API Keys en HabitaEdu.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5 border-top border-secondary">
+        <div class="container text-center text-slate-400 text-sm">
+            <p class="mb-1">© 2026 HabitaEdu — Solución Desarrollada para la Universidad de San Buenaventura y la Alcaldía de Medellín.</p>
+            <small class="text-white-50">Basado en Redes Neuronales CBNN y Filtrado Colaborativo Profundo (DCF).</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS Map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Universidades Coordinates
+        const UNIVERSIDADES = {
+            "USB": [6.2565, -75.5650],
+            "UdeA": [6.2672, -75.5683],
+            "UNAL": [6.2625, -75.5775],
+            "EAFIT": [6.2000, -75.5783],
+            "UPB": [6.2420, -75.5896],
+            "UdeM": [6.2313, -75.6104]
+        };
+
+        // Dataset Simulado con Parámetros Críticos
+        const INMUEBLES = [
+            { id: 1, barrio: "Laureles", precio: 980000, est_ia: 1250000, lat: 6.2442, lon: -75.5900, seg: 8.5, hab: 1, m2: 22, img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80" },
+            { id: 2, barrio: "Belén Miravalle", precio: 820000, est_ia: 1050000, lat: 6.2300, lon: -75.6100, seg: 7.5, hab: 1, m2: 18, img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&q=80" },
+            { id: 3, barrio: "La Candelaria / Centro", precio: 750000, est_ia: 720000, lat: 6.2518, lon: -75.5636, seg: 5.5, hab: 1, m2: 15, img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80" },
+            { id: 4, barrio: "Robledo Palmitas", precio: 680000, est_ia: 890000, lat: 6.2760, lon: -75.5950, seg: 6.8, hab: 1, m2: 20, img: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=80" },
+            { id: 5, barrio: "El Poblado Milla de Oro", precio: 1850000, est_ia: 1400000, lat: 6.2086, lon: -75.5700, seg: 9.2, hab: 1, m2: 32, img: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=500&q=80" },
+            { id: 6, barrio: "Envigado Zúñiga", precio: 1200000, est_ia: 1300000, lat: 6.1759, lon: -75.5917, seg: 9.0, hab: 1, m2: 26, img: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=500&q=80" }
+        ];
+
+        let map, markersLayer;
+
+        function initMap() {
+            // Inicialización del mapa en Medellín
+            map = L.map('map').setView([6.2442, -75.5900], 12);
+            
+            // Capa 1: Esri World Street Map (Libre de API KEY y sin bloqueos 403)
+            const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Capa 2: Esri World Imagery (Vista Satelital)
+            const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
+            });
+
+            // Control de Capas
+            L.control.layers({
+                "Callejero (Esri)": esriStreet,
+                "Satelital (Esri)": esriSat
+            }, null, { position: 'topright' }).addTo(map);
+
+            markersLayer = L.layerGroup().addTo(map);
+            runInference();
+        }
+
+        function haversineKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function runInference() {
+            if (!map) return;
+            markersLayer.clearLayers();
+
+            const univKey = document.getElementById('hero-univ').value;
+            const uCoords = UNIVERSIDADES[univKey];
+            const maxPresupuesto = parseFloat(document.getElementById('hero-presupuesto').value) || 2000000;
+
+            const wCercania = parseFloat(document.getElementById('weight-cercania').value) / 10;
+            const wValor = parseFloat(document.getElementById('weight-valor').value) / 10;
+            const wSeguridad = parseFloat(document.getElementById('weight-seguridad').value) / 10;
+
+            // Marcador del Campus Universitario Seleccionado
+            L.circleMarker(uCoords, {
+                radius: 12,
+                fillColor: '#6C5CE7',
+                color: '#FFFFFF',
+                weight: 3,
+                fillOpacity: 1
+            }).bindPopup(`<b>Campus ${univKey}</b><br>Sede Académica de Referencia`).addTo(markersLayer);
+
+            const evaluados = INMUEBLES.map(item => {
+                const distKm = haversineKm(uCoords[0], uCoords[1], item.lat, item.lon);
+                const ratio = item.precio / item.est_ia;
+
+                // Algoritmo de Puntaje de Idoneidad HabitaEdu
+                const scoreCercania = Math.exp(-distKm / 3.0);
+                const scoreValor = Math.max(0, Math.min(1, (1.25 - ratio) / 0.5));
+                const scoreSeguridad = item.seg / 10.0;
+
+                const scoreTotal = (wCercania * scoreCercania + wValor * scoreValor + wSeguridad * scoreSeguridad) / (wCercania + wValor + wSeguridad);
+
+                return { ...item, distKm, ratio, scoreTotal };
+            }).filter(i => i.precio <= maxPresupuesto).sort((a,b) => b.scoreTotal - a.scoreTotal);
+
+            document.getElementById('status-count').innerText = `${evaluados.length} Opciones encontradas`;
+
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = '';
+
+            evaluados.forEach((res, index) => {
+                let badgeClass = 'badge-fair';
+                let badgeText = 'Precio Justo';
+                let markerColor = '#f59e0b';
+
+                if (res.ratio < 0.92) {
+                    badgeClass = 'badge-opportunity';
+                    badgeText = '¡Oportunidad IA!';
+                    markerColor = '#00B894';
+                } else if (res.ratio > 1.10) {
+                    badgeClass = 'badge-overpriced';
+                    badgeText = 'Sobreprecio';
+                    markerColor = '#EF4444';
+                }
+
+                // Renderizar Tarjetas de Producto
+                container.innerHTML += `
+                    <div class="property-card p-3 position-relative">
+                        <span class="score-badge">Puntaje: ${(res.scoreTotal * 10).toFixed(1)}/10</span>
+                        <div class="d-flex gap-3">
+                            <img src="${res.img}" class="rounded-3 object-fit-cover" style="width: 85px; height: 85px;" alt="Alojamiento">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge ${badgeClass} extra-small">${badgeText}</span>
+                                    <span class="text-muted extra-small"><i class="fa-solid fa-location-dot me-1"></i>${res.barrio}</span>
+                                </div>
+                                <h6 class="fw-bold mb-1 text-navy">$${res.precio.toLocaleString()} COP / mes</h6>
+                                <p class="text-muted extra-small mb-1">Proyección Red: <strong>$${res.est_ia.toLocaleString()} COP</strong></p>
+                                <div class="d-flex gap-3 text-muted extra-small">
+                                    <span><i class="fa-solid fa-ruler-combined me-1"></i>${res.m2} m²</span>
+                                    <span><i class="fa-solid fa-shield-halved me-1"></i>${res.seg}/10</span>
+                                    <span><i class="fa-solid fa-route me-1"></i>${res.distKm.toFixed(1)} km</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Renderizar Marcadores en el Mapa Leaflet
+                L.circleMarker([res.lat, res.lon], {
+                    radius: 10,
+                    fillColor: markerColor,
+                    color: '#FFFFFF',
+                    weight: 2,
+                    fillOpacity: 0.95
+                }).bindPopup(`
+                    <div style="font-family: 'Inter', sans-serif;">
+                        <h6 class="fw-bold mb-1">#${index+1} ${res.barrio}</h6>
+                        <p class="mb-1 text-sm">Publicado: <b>$${res.precio.toLocaleString()} COP</b></p>
+                        <p class="mb-1 text-sm text-success">Proyección IA: <b>$${res.est_ia.toLocaleString()} COP</b></p>
+                        <small>Distancia a ${univKey}: <b>${res.distKm.toFixed(2)} km</b></small>
+                    </div>
+                `).addTo(markersLayer);
+            });
+
+            if (evaluados.length === 0) {
+                container.innerHTML = `<div class="alert alert-warning text-center small my-auto">No hay alojamientos por debajo del presupuesto estipulado. Incrementa el límite en el panel superior.</div>`;
+            }
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
