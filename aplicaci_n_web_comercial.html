@@ -235,15 +235,15 @@
                         <div class="stat-badge d-flex align-items-center gap-3">
                             <i class="fa-solid fa-calculator fs-3 text-warning"></i>
                             <div>
-                                <h6 class="mb-0 fw-bold">13 Parámetros</h6>
+                                <h6 class="mb-0 fw-bold">14 Parámetros</h6>
                                 <small class="text-white-50">Planeación Municipal</small>
                             </div>
                         </div>
                         <div class="stat-badge d-flex align-items-center gap-3">
                             <i class="fa-solid fa-chart-line fs-3 text-success"></i>
                             <div>
-                                <h6 class="mb-0 fw-bold">R² = 0.88</h6>
-                                <small class="text-white-50">Precisión del Modelo MLP</small>
+                                <h6 class="mb-0 fw-bold">Modelo 14 variables</h6>
+                                <small class="text-white-50">Métricas verificables en el servidor</small>
                             </div>
                         </div>
                         <div class="stat-badge d-flex align-items-center gap-3">
@@ -259,7 +259,7 @@
                 <div class="col-lg-5">
                     <div class="p-4 rounded-4 text-dark shadow-lg glass-card">
                         <h4 class="fw-bold mb-3 text-navy"><i class="fa-solid fa-rocket text-primary me-2"></i>Inferencia en Tiempo Real</h4>
-                        <p class="text-muted small mb-4">Selecciona tu universidad y presupuesto en <strong>HabitaEdu</strong> para ejecutar la red neuronal y visualizar la distribución geoespacial de opciones.</p>
+                        <p class="text-muted small mb-4">Selecciona tu universidad y presupuesto en <strong>HabitaEdu</strong> para consultar la base real y visualizar las opciones georreferenciadas.</p>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold text-secondary small">UNIVERSIDAD DE DESTINO</label>
@@ -277,7 +277,8 @@
                             <label class="form-label fw-bold text-secondary small">PRESUPUESTO MÁXIMO (COP)</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input type="number" id="hero-presupuesto" class="form-control form-control-lg fs-6 fw-bold" value="1300000" step="50000" onchange="runInference()">
+                                <input type="number" id="hero-presupuesto" class="form-control form-control-lg fs-6 fw-bold" value="1300000" min="650000" max="10000000" step="50000" onchange="runInference()" aria-describedby="budget-help">
+                                <div id="budget-help" class="form-text">Entre $650.000 y $10.000.000 COP.</div>
                             </div>
                         </div>
 
@@ -308,19 +309,19 @@
             <div class="row g-4">
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-secondary small">CERCANÍA A AULAS (KM)</label>
-                    <input type="range" class="form-range" id="weight-cercania" min="1" max="10" value="8" oninput="runInference()">
+                    <input type="range" class="form-range" id="weight-cercania" min="1" max="10" value="8" oninput="runInference()" aria-label="Prioridad de cercanía a aulas">
                     <div class="d-flex justify-content-between text-muted extra-small"><span>Flexible</span><span class="fw-bold text-primary">Alta Prioridad</span></div>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-secondary small">VALOR JUSTO IA (PRECIO / VALOR)</label>
-                    <input type="range" class="form-range" id="weight-valor" min="1" max="10" value="9" oninput="runInference()">
+                    <input type="range" class="form-range" id="weight-valor" min="1" max="10" value="9" oninput="runInference()" aria-label="Prioridad de valor justo">
                     <div class="d-flex justify-content-between text-muted extra-small"><span>Indiferente</span><span class="fw-bold text-success">Máximo Ahorro</span></div>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-secondary small">SEGURIDAD DE LA ZONA</label>
-                    <input type="range" class="form-range" id="weight-seguridad" min="1" max="10" value="7" oninput="runInference()">
+                    <input type="range" class="form-range" id="weight-seguridad" min="1" max="10" value="7" oninput="runInference()" aria-label="Prioridad de seguridad">
                     <div class="d-flex justify-content-between text-muted extra-small"><span>Básico</span><span class="fw-bold text-info">Alta Seguridad</span></div>
                 </div>
             </div>
@@ -533,16 +534,6 @@
             "UdeM": [6.2313, -75.6104]
         };
 
-        // Dataset Simulado con Parámetros Críticos
-        const INMUEBLES = [
-            { id: 1, barrio: "Laureles", precio: 980000, est_ia: 1250000, lat: 6.2442, lon: -75.5900, seg: 8.5, hab: 1, m2: 22, img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80" },
-            { id: 2, barrio: "Belén Miravalle", precio: 820000, est_ia: 1050000, lat: 6.2300, lon: -75.6100, seg: 7.5, hab: 1, m2: 18, img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&q=80" },
-            { id: 3, barrio: "La Candelaria / Centro", precio: 750000, est_ia: 720000, lat: 6.2518, lon: -75.5636, seg: 5.5, hab: 1, m2: 15, img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80" },
-            { id: 4, barrio: "Robledo Palmitas", precio: 680000, est_ia: 890000, lat: 6.2760, lon: -75.5950, seg: 6.8, hab: 1, m2: 20, img: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=80" },
-            { id: 5, barrio: "El Poblado Milla de Oro", precio: 1850000, est_ia: 1400000, lat: 6.2086, lon: -75.5700, seg: 9.2, hab: 1, m2: 32, img: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=500&q=80" },
-            { id: 6, barrio: "Envigado Zúñiga", precio: 1200000, est_ia: 1300000, lat: 6.1759, lon: -75.5917, seg: 9.0, hab: 1, m2: 26, img: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=500&q=80" }
-        ];
-
         let map, markersLayer;
 
         function initMap() {
@@ -580,103 +571,91 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function runInference() {
+        let inferenceRequest = 0;
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            })[character]);
+        }
+
+        async function runInference() {
             if (!map) return;
-            markersLayer.clearLayers();
-
-            const univKey = document.getElementById('hero-univ').value;
-            const uCoords = UNIVERSIDADES[univKey];
-            const maxPresupuesto = parseFloat(document.getElementById('hero-presupuesto').value) || 2000000;
-
-            const wCercania = parseFloat(document.getElementById('weight-cercania').value) / 10;
-            const wValor = parseFloat(document.getElementById('weight-valor').value) / 10;
-            const wSeguridad = parseFloat(document.getElementById('weight-seguridad').value) / 10;
-
-            // Marcador del Campus Universitario Seleccionado
-            L.circleMarker(uCoords, {
-                radius: 12,
-                fillColor: '#6C5CE7',
-                color: '#FFFFFF',
-                weight: 3,
-                fillOpacity: 1
-            }).bindPopup(`<b>Campus ${univKey}</b><br>Sede Académica de Referencia`).addTo(markersLayer);
-
-            const evaluados = INMUEBLES.map(item => {
-                const distKm = haversineKm(uCoords[0], uCoords[1], item.lat, item.lon);
-                const ratio = item.precio / item.est_ia;
-
-                // Algoritmo de Puntaje de Idoneidad HabitaEdu
-                const scoreCercania = Math.exp(-distKm / 3.0);
-                const scoreValor = Math.max(0, Math.min(1, (1.25 - ratio) / 0.5));
-                const scoreSeguridad = item.seg / 10.0;
-
-                const scoreTotal = (wCercania * scoreCercania + wValor * scoreValor + wSeguridad * scoreSeguridad) / (wCercania + wValor + wSeguridad);
-
-                return { ...item, distKm, ratio, scoreTotal };
-            }).filter(i => i.precio <= maxPresupuesto).sort((a,b) => b.scoreTotal - a.scoreTotal);
-
-            document.getElementById('status-count').innerText = `${evaluados.length} Opciones encontradas`;
-
+            const budgetInput = document.getElementById('hero-presupuesto');
+            const budget = Number(budgetInput.value);
+            if (!Number.isFinite(budget) || budget < 650000 || budget > 10000000) {
+                budgetInput.classList.add('is-invalid');
+                return;
+            }
+            budgetInput.classList.remove('is-invalid');
+            const requestId = ++inferenceRequest;
             const container = document.getElementById('recommendations-container');
-            container.innerHTML = '';
+            const status = document.getElementById('status-count');
+            status.innerText = 'Consultando...';
+            container.innerHTML = '<div class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-2"></span>Cargando inmuebles reales...</div>';
 
-            evaluados.forEach((res, index) => {
-                let badgeClass = 'badge-fair';
-                let badgeText = 'Precio Justo';
-                let markerColor = '#f59e0b';
-
-                if (res.ratio < 0.92) {
-                    badgeClass = 'badge-opportunity';
-                    badgeText = '¡Oportunidad IA!';
-                    markerColor = '#00B894';
-                } else if (res.ratio > 1.10) {
-                    badgeClass = 'badge-overpriced';
-                    badgeText = 'Sobreprecio';
-                    markerColor = '#EF4444';
-                }
-
-                // Renderizar Tarjetas de Producto
-                container.innerHTML += `
-                    <div class="property-card p-3 position-relative">
-                        <span class="score-badge">Puntaje: ${(res.scoreTotal * 10).toFixed(1)}/10</span>
-                        <div class="d-flex gap-3">
-                            <img src="${res.img}" class="rounded-3 object-fit-cover" style="width: 85px; height: 85px;" alt="Alojamiento">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge ${badgeClass} extra-small">${badgeText}</span>
-                                    <span class="text-muted extra-small"><i class="fa-solid fa-location-dot me-1"></i>${res.barrio}</span>
-                                </div>
-                                <h6 class="fw-bold mb-1 text-navy">$${res.precio.toLocaleString()} COP / mes</h6>
-                                <p class="text-muted extra-small mb-1">Proyección Red: <strong>$${res.est_ia.toLocaleString()} COP</strong></p>
-                                <div class="d-flex gap-3 text-muted extra-small">
-                                    <span><i class="fa-solid fa-ruler-combined me-1"></i>${res.m2} m²</span>
-                                    <span><i class="fa-solid fa-shield-halved me-1"></i>${res.seg}/10</span>
-                                    <span><i class="fa-solid fa-route me-1"></i>${res.distKm.toFixed(1)} km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Renderizar Marcadores en el Mapa Leaflet
-                L.circleMarker([res.lat, res.lon], {
-                    radius: 10,
-                    fillColor: markerColor,
-                    color: '#FFFFFF',
-                    weight: 2,
-                    fillOpacity: 0.95
-                }).bindPopup(`
-                    <div style="font-family: 'Inter', sans-serif;">
-                        <h6 class="fw-bold mb-1">#${index+1} ${res.barrio}</h6>
-                        <p class="mb-1 text-sm">Publicado: <b>$${res.precio.toLocaleString()} COP</b></p>
-                        <p class="mb-1 text-sm text-success">Proyección IA: <b>$${res.est_ia.toLocaleString()} COP</b></p>
-                        <small>Distancia a ${univKey}: <b>${res.distKm.toFixed(2)} km</b></small>
-                    </div>
-                `).addTo(markersLayer);
+            const university = document.getElementById('hero-univ').value;
+            const params = new URLSearchParams({
+                university,
+                budget,
+                proximity: document.getElementById('weight-cercania').value,
+                value: document.getElementById('weight-valor').value,
+                security: document.getElementById('weight-seguridad').value
             });
 
-            if (evaluados.length === 0) {
-                container.innerHTML = `<div class="alert alert-warning text-center small my-auto">No hay alojamientos por debajo del presupuesto estipulado. Incrementa el límite en el panel superior.</div>`;
+            try {
+                const response = await fetch(`/api/recommendations?${params}`);
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error || 'No fue posible consultar los datos');
+                if (requestId !== inferenceRequest) return;
+                markersLayer.clearLayers();
+                const universityCoords = UNIVERSIDADES[university];
+                L.circleMarker(universityCoords, {
+                    radius: 12, fillColor: '#6C5CE7', color: '#FFFFFF', weight: 3, fillOpacity: 1
+                }).bindPopup(`<b>${escapeHtml(payload.university)}</b><br>Sede académica seleccionada`).addTo(markersLayer);
+
+                status.innerText = `${payload.count} opciones encontradas`;
+                if (payload.model_card && payload.model_card.r2 !== undefined) {
+                    status.title = `Modelo: R² ${payload.model_card.r2.toFixed(3)} · MAE $${Math.round(payload.model_card.mae).toLocaleString('es-CO')} · ${payload.model_card.samples} registros`;
+                }
+                container.innerHTML = '';
+                payload.results.forEach((res, index) => {
+                    const classes = { oportunidad: 'badge-opportunity', precio_justo: 'badge-fair', sobreprecio: 'badge-overpriced' };
+                    const labels = { oportunidad: '¡Oportunidad IA!', precio_justo: 'Precio Justo', sobreprecio: 'Sobreprecio' };
+                    container.insertAdjacentHTML('beforeend', `
+                        <article class="property-card p-3 position-relative">
+                            <span class="score-badge">Puntaje: ${res.score.toFixed(1)}/10</span>
+                            <div class="d-flex gap-3">
+                                <div class="rounded-3 bg-dark bg-opacity-10 d-flex align-items-center justify-content-center" style="width:85px;height:85px;flex:none">
+                                    <i class="fa-solid fa-building fs-3 text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                        <span class="badge ${classes[res.classification]} extra-small">${labels[res.classification]}</span>
+                                        <span class="text-muted extra-small"><i class="fa-solid fa-location-dot me-1"></i>${escapeHtml(res.barrio)}</span>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-navy">$${Math.round(res.precio).toLocaleString('es-CO')} COP / mes</h6>
+                                    <p class="text-muted extra-small mb-1">${payload.model_available ? 'Estimación del modelo' : 'Estimación disponible'}: <strong>$${Math.round(res.prediction).toLocaleString('es-CO')} COP</strong></p>
+                                    <div class="d-flex flex-wrap gap-3 text-muted extra-small">
+                                        <span><i class="fa-solid fa-ruler-combined me-1"></i>${res.area_m2} m²</span>
+                                        <span><i class="fa-solid fa-shield-halved me-1"></i>${res.seguridad}/10</span>
+                                        <span><i class="fa-solid fa-route me-1"></i>${res.distance_km} km</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>`);
+
+                    L.circleMarker([res.lat, res.lon], {
+                        radius: 10, fillColor: res.marker_color, color: '#FFFFFF', weight: 2, fillOpacity: 0.95
+                    }).bindPopup(`<div style="font-family:Inter,sans-serif"><h6>#${index + 1} ${escapeHtml(res.barrio)}</h6><p>Publicado: <b>$${Math.round(res.precio).toLocaleString('es-CO')}</b></p><p>Estimación: <b>$${Math.round(res.prediction).toLocaleString('es-CO')}</b></p><small>Distancia: <b>${res.distance_km} km</b></small>${res.coordinate_approximate ? '<br><small>Ubicación aproximada</small>' : ''}</div>`).addTo(markersLayer);
+                });
+
+                if (!payload.results.length) {
+                    container.innerHTML = '<div class="alert alert-warning text-center small my-auto">No hay alojamientos dentro de este presupuesto. Incrementa el límite.</div>';
+                }
+            } catch (error) {
+                status.innerText = 'Error de consulta';
+                container.innerHTML = `<div class="alert alert-danger text-center small my-auto">${escapeHtml(error.message)}</div>`;
             }
         }
 
