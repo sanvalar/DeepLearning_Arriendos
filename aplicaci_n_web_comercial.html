@@ -104,31 +104,73 @@
 
         /* Property Product Card */
         .property-card {
-            border-radius: 1.25rem;
+            border-radius: 1rem;
             overflow: hidden;
             border: 1px solid #E2E8F0;
             background: #FFFFFF;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .property-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: var(--tech-purple);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -12px rgba(15, 23, 42, 0.2);
+            border-color: rgba(108, 92, 231, 0.55);
+        }
+
+        .property-card-grid {
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr) 86px;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .property-card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 0.85rem;
+            background: linear-gradient(145deg, #EEF2FF, #F1F5F9);
+        }
+
+        .property-card-content {
+            min-width: 0;
+        }
+
+        .property-card-meta {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .score-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(6px);
+            justify-self: end;
+            min-width: 82px;
+            text-align: center;
+            background: #0F172A;
             color: #F8FAFC;
             font-weight: 700;
-            padding: 0.35rem 0.75rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.42rem 0.55rem;
+            border-radius: 0.65rem;
+            font-size: 0.72rem;
+            line-height: 1.25;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+        }
+
+        @media (max-width: 430px) {
+            .property-card-grid {
+                grid-template-columns: 54px minmax(0, 1fr);
+            }
+
+            .property-card-icon {
+                width: 54px;
+                height: 54px;
+            }
+
+            .score-badge {
+                grid-column: 2;
+                justify-self: start;
+                margin-top: 0.15rem;
+            }
         }
 
         .badge-opportunity { background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
@@ -623,25 +665,25 @@
                     const classes = { oportunidad: 'badge-opportunity', precio_justo: 'badge-fair', sobreprecio: 'badge-overpriced' };
                     const labels = { oportunidad: '¡Oportunidad IA!', precio_justo: 'Precio Justo', sobreprecio: 'Sobreprecio' };
                     container.insertAdjacentHTML('beforeend', `
-                        <article class="property-card p-3 position-relative">
-                            <span class="score-badge">Puntaje: ${res.score.toFixed(1)}/10</span>
-                            <div class="d-flex gap-3">
-                                <div class="rounded-3 bg-dark bg-opacity-10 d-flex align-items-center justify-content-center" style="width:85px;height:85px;flex:none">
-                                    <i class="fa-solid fa-building fs-3 text-primary"></i>
+                        <article class="property-card p-3">
+                            <div class="property-card-grid">
+                                <div class="property-card-icon d-flex align-items-center justify-content-center">
+                                    <i class="fa-solid fa-building fs-4 text-primary"></i>
                                 </div>
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                        <span class="badge ${classes[res.classification]} extra-small">${labels[res.classification]}</span>
-                                        <span class="text-muted extra-small"><i class="fa-solid fa-location-dot me-1"></i>${escapeHtml(res.barrio)}</span>
+                                <div class="property-card-content">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge ${classes[res.classification]} extra-small flex-shrink-0">${labels[res.classification]}</span>
+                                        <span class="text-muted extra-small property-card-meta" title="${escapeHtml(res.barrio)}"><i class="fa-solid fa-location-dot me-1"></i>${escapeHtml(res.barrio)}</span>
                                     </div>
                                     <h6 class="fw-bold mb-1 text-navy">$${Math.round(res.precio).toLocaleString('es-CO')} COP / mes</h6>
-                                    <p class="text-muted extra-small mb-1">${payload.model_available ? 'Estimación del modelo' : 'Estimación disponible'}: <strong>$${Math.round(res.prediction).toLocaleString('es-CO')} COP</strong></p>
-                                    <div class="d-flex flex-wrap gap-3 text-muted extra-small">
+                                    <p class="text-muted extra-small mb-1 text-truncate" title="${payload.model_available ? 'Estimación del modelo' : 'Estimación disponible'}: $${Math.round(res.prediction).toLocaleString('es-CO')} COP">${payload.model_available ? 'Estimación IA' : 'Estimación'}: <strong>$${Math.round(res.prediction).toLocaleString('es-CO')}</strong></p>
+                                    <div class="d-flex flex-wrap gap-2 text-muted extra-small">
                                         <span><i class="fa-solid fa-ruler-combined me-1"></i>${res.area_m2} m²</span>
                                         <span><i class="fa-solid fa-shield-halved me-1"></i>${res.seguridad}/10</span>
                                         <span><i class="fa-solid fa-route me-1"></i>${res.distance_km} km</span>
                                     </div>
                                 </div>
+                                <span class="score-badge"><span class="d-block extra-small fw-normal text-white-50">Puntaje</span>${res.score.toFixed(1)}/10</span>
                             </div>
                         </article>`);
 
